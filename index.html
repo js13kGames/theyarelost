@@ -1,0 +1,253 @@
+<html>
+<!-- Thanks to the following CodePen users for sharing their CSS magic:
+https://codepen.io/saransh/ - @saransh
+https://codepen.io/lbebber/ - @lbebber
+https://codepen.io/gallifreyan1056/ - @gallifreyan1056
+https://codepen.io/mandymichael/ - @mandymichael
+-->
+<head>
+<link rel="stylesheet" href="style.css">
+</head><body onload="start();">
+	<div id="screen">
+		<!--This is where we'll be attaching our scenes-->
+	</div>
+	
+	<!-- This is bad code, but here's the modal used throughout -->
+	<div id="myModal" class="modal">
+	  <div class="modal-content">
+		<span class="close">&times;</span>
+		<div id="content">Placeholder text</div>
+	  </div>
+	</div>
+	
+	<script>
+		/* Global Variables */
+		
+		var screen = document.getElementById("screen");
+		var updateTimer;
+		
+		/* Game Variables */
+		var materials=100;
+		var people=10;
+		var ships=0;
+		
+		var factory = 0;
+		var farm = 0;
+		
+		var materialGrowth = 0;
+		var peopleGrowth = 0;
+		
+		var evil = 0;
+		
+		
+		/* The function where the game takes place. Map Screen and pop-up dialogues for the planets */
+		function mapScreen() {
+			/* Create the elements for the menu, planets, etc */
+			screen.innerHTML = '<div id="screen-wrapper" class="screen3"><div class="menu"><div id="people"></div><div id="materials"></div><div id="ships"></div></div><div id="stars"></div><div id="stars2"></div><div id="stars3"></div><div id="game-wrap" class="game-wrap"><div class="planet" id="p1"><div class="home"></div><div class="home_1"></div></div><div class="planet" id="p2"></div><div class="planet" id="p3"></div><div class="planet" id="p4"><div class="orbit"><div class="moon"></div></div></div><div class="planet" id="p5"></div><div class="planet" id="p6"><div class="ring"></div></div><div class="planet" id="p7"></div><div class="planet" id="p8"></div></div></div>';
+			/* Setup up the resources and start the update function */
+			initResources();
+			startTimer();
+			
+			/* Store the modal info since we'll be using it a lot */
+			var modal = document.getElementById('myModal');
+			var content = document.getElementById('content');
+			var span = document.getElementsByClassName("close")[0];
+			
+			/* Bad Code; Variables for each planet */
+			var p1 = document.getElementById("p1");
+			var p2 = document.getElementById("p2");
+			var p3 = document.getElementById("p3");
+			var p4 = document.getElementById("p4");
+			
+			var p5 = document.getElementById("p5");
+			var p6 = document.getElementById("p6");
+			var p7 = document.getElementById("p7");
+			var p8 = document.getElementById("p8");
+			
+			/* Bad Code; Variables to check if we've been to a planet already */
+			var p2Finish = false;
+			var p3Finish = false;
+			var p4Finish = false;
+			var p5Finish = false;
+			
+			var p6Finish = false;
+			var p7Finish = false;
+			var p8Finish = false;
+			
+			/* Called to see if the player won */
+			function didWin () {
+				if(ships >= 100)
+				{
+					modal.style.display = "none";
+					outro();
+				}
+			}
+
+			/* OnClick's for all of the planets
+				Tons of bad code, should be using classes and junk */
+			p1.onclick = function() {
+				/* Setup the modal for use */
+				modal.style.display = "block";
+				var contentString = '<h3>Home Colony</h3>';
+				contentString += '<div class="buybox"><p id="factoryText">Factory x'+factory+'</p><p>Each factory generates an extra 1 material per second</p><p>Factory Cost: 25 materials</p><div id="buyFactory" class="fuller-button white">Buy A Factory</div><div id="buy10Factory" class=" fuller-button white">Buy 10 Factories</div></div>';
+				contentString += '<div class="buybox"><p id="farmText">Farm x'+farm+'</p><p>Each farm generates an extra person per second</p><p>Farm Cost: 25 materials</p><div id="buyFarm" class="fuller-button white">Buy A Farm</div><div id="buy10Farm" class=" fuller-button white">Buy 10 Farms</div></div>';
+				contentString += '<div class="buybox"><p id="shipText">Ships x'+ships+'</p><p>You need 100 Ships to bring your empire back to space</p><p>Ship Cost: 100 materials</p><div id="buyShip" class="fuller-button white">Buy A Ship</div><div id="buy10Ship" class=" fuller-button white">Buy 10 Ships</div></div>';
+				content.innerHTML = contentString;
+				
+				/* OnClick's for all of the modal buttons */
+				document.getElementById('buyFactory').onclick = function() {if(materials>=25){this.className+=" blue";setInterval(function(){document.getElementById('buyFactory').classList.remove("blue");},2000);factory++;materials-=25;materialGrowth++;document.getElementById('factoryText').innerHTML="Factory x" +factory;}else{this.className+=" red";setInterval(function(){document.getElementById('buyFactory').classList.remove("red");},2000);}};
+				document.getElementById('buyFarm').onclick = function() {if(materials>=25){this.className+=" blue";setInterval(function(){document.getElementById('buyFarm').classList.remove("blue");},2000);farm++;materials-=25;peopleGrowth++;document.getElementById('farmText').innerHTML="Farm x" +farm;}else{this.className+=" red";setInterval(function(){document.getElementById('buyFarm').classList.remove("red");},2000);}};
+				document.getElementById('buy10Factory').onclick = function() {if(materials>=250){this.className+=" blue";setInterval(function(){document.getElementById('buy10Factory').classList.remove("blue");},2000);factory+=10;materials-=250;materialGrowth+=10;document.getElementById('factoryText').innerHTML="Factory x" +factory;}else{this.className+=" red";setInterval(function(){document.getElementById('buy10Factory').classList.remove("red");},2000);}};
+				document.getElementById('buy10Farm').onclick = function() {if(materials>=250){this.className+=" blue";setInterval(function(){document.getElementById('buy10Farm').classList.remove("blue");},2000);farm+=10;materials-=250;peopleGrowth+=10;document.getElementById('farmText').innerHTML="Farm x" +farm;}else{this.className+=" red";setInterval(function(){document.getElementById('buy10Farm').classList.remove("red");},2000);}};
+				document.getElementById('buyShip').onclick = function() {if(materials>=100){this.className+=" blue";setInterval(function(){document.getElementById('buyShip').classList.remove("blue");},2000);ships++;materials-=100;document.getElementById('shipText').innerHTML="Ships x" +ships;didWin();}else{this.className+=" red";setInterval(function(){document.getElementById('buyShip').classList.remove("red");},2000);}};
+				document.getElementById('buy10Ship').onclick = function() {if(materials>=1000){this.className+=" blue";setInterval(function(){document.getElementById('buy10Ship').classList.remove("blue");},2000);ships+=10;materials-=1000;document.getElementById('shipText').innerHTML="Ships x" +ships;didWin();}else{this.className+=" red";setInterval(function(){document.getElementById('buy10Ship').classList.remove("red");},2000);}};
+			}
+			
+			p2.onclick = function() {
+				modal.style.display = "block";
+				/* See if we've been to this planet before */
+				if(p2Finish == false){
+					content.innerHTML = '<h3>Porenugus e4</h3><p class="desc">The remnants of our people that have been stranded here are doing well. Their people have multiplied beyond our standard reproduction rates. Taking samples may help to improve the empire, but something about them seems... off.<p><p>How should we handle the situation Captain?</p><div id="c1" class=" fuller-button white">Take a sample back, the more of us the better</div><div id="c2" class=" fuller-button white">Leave them be, this effects of DNA changes could be dangerous</div><div id="c3" class=" fuller-button white">There is too much risk involved. Purge the colony and scavenge the supplies</div>';
+					document.getElementById('c1').onclick = function() {people *= 2; peopleGrowth = (peopleGrowth+1)*2;p2Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {p2Finish=true; modal.style.display = "none";}
+					document.getElementById('c3').onclick = function() {materials+=100;evil++;p2Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p3.onclick = function() {
+				modal.style.display = "block";
+				if(p3Finish == false){
+					content.innerHTML = '<h3>Zionosuk-RX</h3><p class="desc">The survivors on this planet are doing poorly. Local species have been attacking their camps on a regular basis. They are running on low materials.</p><div id="c1" class=" fuller-button white">Give them the resources they need (-100 Materials)</div><div id="c2" class=" fuller-button white">Take the most promising survivors with you</div><div id="c3" class=" fuller-button white">We cannot deal with this right now</div>';
+					document.getElementById('c1').onclick = function() {if(materials>=100){materials-=100;peopleGrowth++;}p3Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {people+=30;evil++;p3Finish=true; modal.style.display = "none";}
+					document.getElementById('c3').onclick = function() {p3Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p4.onclick = function() {
+				modal.style.display = "block";
+				if(p4Finish == false){
+					content.innerHTML = '<h3>Lynatea Sigma</h3><p class="desc">The remaining souls on this planet have subverted the culture of the empire, worshipping the several ships that they have managed to restore to usable condition.</p><div id="c1" class=" fuller-button white">There is no place for heretics in the empire, kill them, take the ships</div><div id="c2" class=" fuller-button white">All our welcome, allow them to join you</div><div id="c3" class=" fuller-button white">Maybe its best to leave them alone</div>';
+					document.getElementById('c1').onclick = function() {ships+=3;evil++;p4Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {people+=30;p4Finish=true; modal.style.display = "none";}
+					document.getElementById('c3').onclick = function() {p4Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p5.onclick = function() {
+				modal.style.display = "block";
+				if(p5Finish == false){
+					content.innerHTML = '<h3>Pezgua f7</h3><p class="desc">Scanners show that the planet is ripe for mining, with rich ore deposits not far below the surface. Gas veins underneath the surface make it dangerous to drill though.</p><div id="c1" class=" fuller-button white">Leave some people here to gather more materials</div><div id="c2" class=" fuller-button white">Leave, we cant risk any of our people</div>';
+					document.getElementById('c1').onclick = function() {people-=5;materialGrowth+=3;p5Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {p5Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p6.onclick = function() {
+				modal.style.display = "block";
+				if(p6Finish == false){
+					content.innerHTML = '<h3>Alulis</h3><p class="desc">This planet is oddly empty.</p><div id="c1" class=" fuller-button white">Lame. Lets move on</div>';
+					document.getElementById('c1').onclick = function() {p6Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p7.onclick = function() {
+				modal.style.display = "block";
+				if(p7Finish == false){
+					content.innerHTML = '<h3>Keratea</h3><p class="desc">It looks like the unfortunate souls that were stranded here have died. Best to grab what we need and leave.</p><div id="c1" class=" fuller-button white">Grab the Hydro-CropperPlus Aquifer</div><div id="c2" class=" fuller-button white">Take the AstroOil Factory Grade 90e</div><div id="c3" class=" fuller-button white">Loot their building warehouse</div>';
+					document.getElementById('c1').onclick = function() {farm+=3;p7Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {factory+=3;p7Finish=true; modal.style.display = "none";}
+					document.getElementById('c3').onclick = function() {materials+=200;p7Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+			
+			p8.onclick = function() {
+				modal.style.display = "block";
+				if(p8Finish == false){
+					content.innerHTML = '<h3>Charlon</h3><p class="desc">A bunch of slavers are gathering new product from this world. The sentient beings that are becoming their victims are not our own.</p><div id="c1" class=" fuller-button white">Eradicate the slavers on this planet</div><div id="c2" class=" fuller-button white">Let them be, this is none of our concern</div>';
+					document.getElementById('c1').onclick = function() {p8Finish=true; modal.style.display = "none";}
+					document.getElementById('c2').onclick = function() {p8Finish=true; modal.style.display = "none";}
+					document.getElementById('c3').onclick = function() {p8Finish=true; modal.style.display = "none";}
+				} else {
+					content.innerHTML = 'You have already been here.';
+				}
+			}
+
+			/* When clicking the modal 'X', close it */
+			span.onclick = function() {
+				modal.style.display = "none";
+			}
+
+			/* Close the modal when clicking outside of it */
+			window.onclick = function(event) {
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			}
+
+		}
+		
+
+		/* start accumulating resources */
+		function startTimer() {
+			updateTimer = setInterval(updateResources, 1000);
+		}
+		
+		/* Set resources for the first time */
+		function initResources() {
+			document.getElementById("materials").innerHTML = '<p>Materials: ' + materials + '</p>';
+			document.getElementById("people").innerHTML = '<p>Population: ' + people + '</p>';
+			document.getElementById("ships").innerHTML = '<p>Shuttles: ' + ships + '/100</p>';
+		}
+		
+		/* Call to update the resources */
+		function updateResources() {
+			materials = Math.round(((materials + materialGrowth)) + (people/10));
+			people = (people + peopleGrowth);
+			document.getElementById("materials").innerHTML = '<p>Materials: ' + materials + '</p>';
+			document.getElementById("people").innerHTML = '<p>Population: ' + people + '</p>';
+			document.getElementById("ships").innerHTML = '<p>Shuttles: ' + ships + '/100</p>';
+		}
+
+		/* The very first screen with name/credits */
+		function start() {	
+			screen.innerHTML = '<div id="screen-wrapper" class="screen1"><div class="creds">Props to codepen users <a href="https://codepen.io/saransh/">@saransh</a> <a href="https://codepen.io/lbebber/">@lbebber</a> <a href="https://codepen.io/gallifreyan1056/">@gallifreyan1056</a> <a href="https://codepen.io/mandymichael/">@mandymichael</a></div><div class="center"><a class="name" href="https://twitter.com/kylejspeaker">@KyleJSpeaker</a><h1 class="rotate" data-heading="The">The</h1><h1 data-heading="Internet Astronaut" class="other">Internet Astronaut</h1><div class="container"><div class="astronaut"><div class="astronaut-head"><div class="astronaut-head--face"></div></div><div class="astronaut-head--antenna"></div><div class="astronaut-head--ears"></div><div class="astronaut-body"><div class="astronaut-body--panel"></div></div></div></div></div></div>';
+			document.getElementById("screen-wrapper").onclick = function () {screen.removeChild(screen.firstChild);intro();};
+		}
+		
+		/* The story prologue */
+		function intro() {
+			screen.innerHTML = '<div id="screen-wrapper" class="screen2"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div><div class="intro"><p class="fade-in one">We spanned the universe.</p><p class="fade-in two">Before the <span class="glow">Great Lightning</span> took us from the skies.</p><p class="fade-in three">My people are alone, separated.</p><p class="fade-in four">I must rebuild to find them.</p><p class="fade-in five">They are </p><span class="glitch fade-in five" data-text="LOST">LOST</span></div><div id="intro-continue"></div></div>';
+			document.getElementById("intro-continue").onclick = function () {screen.removeChild(screen.firstChild);mapScreen();};
+		}
+		
+		/* The story epilogue */
+		function outro() {
+			var screenOutput = '<div id="screen-wrapper" class="screen2"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div><div class="intro"><p class="fade-in one">Our ships reached into the furthest corners.</p><p class="fade-in two">We were no longer stranded and alone</p><p class="fade-in three">Hope has spread through our ranks</p>';
+			/* Determine which ending to give the player */
+			if(evil>=2){
+				screenOutput += '<p class="fade-in four">The universe will bend to our will.</p>';
+				screenOutput += '<p class="fade-in five"><span class="glow">We Will Conquer</span></div>';
+			} else {
+				screenOutput += '<p class="fade-in four">We will rebuild in peace, united.</p>';
+				screenOutput += '<p class="fade-in five"><span class="glow">We Will Rise</span></div>';
+			}
+			screen.innerHTML = screenOutput;
+		}
+	
+	</script>
+	
+</body>
+</html>
